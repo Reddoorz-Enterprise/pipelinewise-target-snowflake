@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .virtualenvs
+varchar_cols/
 .venv
 *.egg-info/
 *__pycache__/

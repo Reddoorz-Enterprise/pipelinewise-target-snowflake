@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 [packages]
 pipelinewise-singer-python = "==1.*"
-snowflake-connector-python = { version = "==3.11.0", extras = ["pandas"] }
+snowflake-connector-python = { version = "==3.13.0", extras = ["pandas"] }
 inflection = "==0.5.1"
 joblib = "==1.2.0"
 certifi= "==2025.1.31"
