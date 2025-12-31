@@ -96,55 +96,19 @@ class TestDBSync(unittest.TestCase):
         """Test JSON type to Snowflake column type mappings"""
         mapper = db_sync.column_type
 
-        # Snowflake column types
-        sf_types = {
-            'str': 'text',
-            'str_or_null': 'text',
-            'dt': 'timestamp_ntz',
-            'dt_or_null': 'timestamp_ntz',
-            'd': 'date',
-            'd_or_null': 'date',
-            'time': 'time',
-            'time_or_null': 'time',
-            'binary': 'binary',
-            'num': 'float',
-            'int': 'number',
-            'int_or_str': 'text',
-            'bool': 'boolean',
-            'obj': 'variant',
-            'arr': 'variant',
-        }
-
+        # All column types should now return varchar
         # Mapping from JSON schema types to Snowflake column types
         for key, val in self.json_types.items():
-            self.assertEqual(mapper(val), sf_types[key])
+            self.assertEqual(mapper(val), 'varchar')
 
     def test_column_trans(self):
         """Test column transformation"""
         trans = db_sync.column_trans
 
-        # Snowflake column transformations
-        sf_trans = {
-            'str': '',
-            'str_or_null': '',
-            'dt': '',
-            'dt_or_null': '',
-            'd': '',
-            'd_or_null': '',
-            'time': '',
-            'time_or_null': '',
-            'binary': 'to_binary',
-            'num': '',
-            'int': '',
-            'int_or_str': '',
-            'bool': '',
-            'obj': 'parse_json',
-            'arr': 'parse_json',
-        }
-
+        # All column transformations should now return empty string since everything is varchar
         # Getting transformations for every JSON type
         for key, val in self.json_types.items():
-            self.assertEqual(trans(val), sf_trans[key])
+            self.assertEqual(trans(val), '')
 
     def test_create_query_tag(self):
         self.assertIsNone(db_sync.create_query_tag(None))

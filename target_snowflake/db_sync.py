@@ -83,43 +83,14 @@ def validate_config(config):
 
 def column_type(schema_property):
     """Take a specific schema property and return the snowflake equivalent column type"""
-    property_type = schema_property["type"]
-    property_format = schema_property["format"] if "format" in schema_property else None
-    col_type = "text"
-    if "object" in property_type or "array" in property_type:
-        col_type = "variant"
-
-    # Every date-time JSON value is currently mapped to TIMESTAMP_NTZ
-    elif property_format == "date-time":
-        col_type = "timestamp_ntz"
-    elif property_format == "date":
-        col_type = "date"
-    elif property_format == "time":
-        col_type = "time"
-    elif property_format == "binary":
-        col_type = "binary"
-    elif "number" in property_type:
-        col_type = "float"
-    elif "integer" in property_type and "string" in property_type:
-        col_type = "text"
-    elif "integer" in property_type:
-        col_type = "number"
-    elif "boolean" in property_type:
-        col_type = "boolean"
-
-    return col_type
+    # Always return varchar for all columns to ensure all data is stored as varchar
+    return "varchar"
 
 
 def column_trans(schema_property):
     """Generate SQL transformed columns syntax"""
-    property_type = schema_property["type"]
-    col_trans = ""
-    if "object" in property_type or "array" in property_type:
-        col_trans = "parse_json"
-    elif schema_property.get("format") == "binary":
-        col_trans = "to_binary"
-
-    return col_trans
+    # No transformation needed since all columns are varchar
+    return ""
 
 
 def safe_column_name(name):
@@ -844,16 +815,8 @@ class DbSync:
             (safe_column_name(name), column_clause(name, properties_schema))
             for (name, properties_schema) in self.flatten_schema.items()
             if name.upper() in columns_dict
-            and columns_dict[name.upper()]["DATA_TYPE"].upper()
-            != column_type(properties_schema).upper()
-            and
-            # Don't alter table if TIMESTAMP_NTZ detected as the new required column type
-            #
-            # Target-snowflake maps every data-time JSON types to TIMESTAMP_NTZ but sometimes
-            # a TIMESTAMP_TZ column is already available in the target table (i.e. created by fastsync initial load)
-            # We need to exclude this conversion otherwise we loose the data that is already populated
-            # in the column
-            column_type(properties_schema).upper() != "TIMESTAMP_NTZ"
+            and columns_dict[name.upper()]["DATA_TYPE"].upper() not in ["VARCHAR", "TEXT"]
+            # Since we're converting everything to VARCHAR, replace any column that isn't already VARCHAR or TEXT
         ]
 
         for column_name, column in columns_to_replace:
